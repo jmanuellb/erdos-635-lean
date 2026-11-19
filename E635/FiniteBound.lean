@@ -135,7 +135,7 @@ theorem badSet_subset {T N : ℕ} (hT : 3 ≤ T) :
       push_cast at this
       linarith
     have hlog : Real.log (3 * e / 2) ≤ 2 * Real.log (radT T e) := by
-      have hp2 := Real.log_pow 2 (radT T e : ℝ)
+      have hp2 := Real.log_pow (radT T e : ℝ) 2
       push_cast at hp2
       rw [← hp2]
       exact Real.log_le_log (by linarith) hRr

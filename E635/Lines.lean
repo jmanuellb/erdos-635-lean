@@ -44,9 +44,9 @@ theorem one_per_line {t : ℕ} {A : Finset ℕ} (hgood : Good t A) {o p : ℕ}
   have hd : (o + p) - (o - p) = 2 * p := by omega
   refine hgood _ h1 _ h2 (by omega) (by omega) ?_
   rw [hd]
-  refine ⟨q / 2 + 1, ?_⟩
-  have hq' : q = 2 * (q / 2) + 1 := by omega
-  rw [hq, hq']
+  obtain ⟨r, hr⟩ : ∃ r, q = 2 * r + 1 := ⟨q / 2, by omega⟩
+  refine ⟨r + 1, ?_⟩
+  rw [hq, hr]
   ring
 
 theorem sub_not_mem {t : ℕ} {A : Finset ℕ} (hgood : Good t A) {e p : ℕ} (he : e ∈ A)

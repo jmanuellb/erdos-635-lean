@@ -83,10 +83,11 @@ theorem sum_cov_le {t T N : ℕ} (htT : t ≤ T) (hT : 3 ≤ T) {w : ℕ → ℕ
       ∑ x ∈ pairs T N (A.filter (fun x => x ∉ odds N)), w (x.1 - x.2) x.2 +
       ∑ x ∈ (pairs T N (A.filter (fun x => x ∉ odds N))).filter (fun x => x.1 + x.2 ≤ N),
         w (x.1 + x.2) x.2 := by
-    rw [sum_filter, sum_pairs hSI, sum_pairs hSI, ← sum_add_distrib]
+    rw [sum_filter (fun x : ℕ × ℕ => x.1 + x.2 ≤ N), sum_pairs hSI, sum_pairs hSI,
+      ← sum_add_distrib]
     refine sum_congr rfl (fun e _ => ?_)
     unfold cov
-    rw [sum_add_distrib]
+    exact sum_add_distrib
   have hinjX : Set.InjOn (fun x : ℕ × ℕ => (x.1 - x.2, x.2))
       ↑(pairs T N (A.filter (fun x => x ∉ odds N))) := by
     rintro ⟨e, p⟩ hx ⟨e', p'⟩ hy hxy
@@ -150,7 +151,9 @@ theorem card_le_of_weight {t T N : ℕ} (htT : t ≤ T) (hT : 3 ≤ T) {w : ℕ 
   have h2 : ((A.filter (fun x => x ∉ odds N)).card : ℝ) ≤
       ∑ e ∈ A.filter (fun x => x ∉ odds N), cov T N w e +
         (((A.filter (fun x => x ∉ odds N)).filter (fun e => cov T N w e < 1)).card : ℝ) := by
-    rw [card_filter, card_eq_sum_ones, Nat.cast_sum, Nat.cast_sum, ← sum_add_distrib]
+    rw [card_filter (fun e => cov T N w e < 1) (A.filter (fun x => x ∉ odds N)),
+      card_eq_sum_ones (A.filter (fun x => x ∉ odds N)), Nat.cast_sum, Nat.cast_sum,
+      ← sum_add_distrib]
     refine sum_le_sum (fun e _ => ?_)
     have := cov_nonneg hw.1 (T := T) (N := N) e
     split_ifs with h

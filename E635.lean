@@ -3,4 +3,8 @@ import E635.SecondMoment
 import E635.PrimeSum
 import E635.Main
 import E635.LowerBound
+import E635.Lines
+import E635.DoubleCount
+import E635.Weights
+import E635.FiniteBound
 import E635.Axioms

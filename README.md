@@ -16,6 +16,10 @@ admissible set of size `⌈N/2⌉` for every `t` and `N`, so the maximum `M(t, N
 determine `M(t, N)` exactly for `t ≥ 2` (where it can exceed `⌈N/2⌉`, e.g. `M(2, 14) = 9`) or the
 size of the error term `M(t, N) − N/2`.
 
+It also proves the explicit finite inequality `M(t, N) ≤ ⌈N/2⌉ + |B₁| + |B₂|` (Theorem A of the
+accompanying note, finite form; see below), from which the error term `O(N / log N)` follows by
+standard analytic estimates that are not formalized here.
+
 ## Lean statements
 
 ### Upper bound
@@ -65,6 +69,43 @@ problem, spelled out verbatim in `maxAdmissible_eq_iff` (the defining property o
 into `card_le_maxAdmissible` and `exists_card_eq_maxAdmissible`). `~[Filter.atTop]` is Mathlib's
 `Asymptotics.IsEquivalent`: `M(t, N) − N/2 = o(N/2)`.
 
+### Finite core of the explicit bound `M(t, N) ≤ ⌈N/2⌉ + |B₁| + |B₂|`
+
+Files `E635/Lines.lean`, `E635/DoubleCount.lean`, `E635/Weights.lean`, `E635/FiniteBound.lean`
+(namespace `E635`). `lines T n` is the set of primes `p ≥ T` dividing `n`; `odds N` is the set of
+odd numbers in `[1, N]`.
+
+```lean
+theorem one_per_line {t : ℕ} {A : Finset ℕ} (hgood : Good t A) {o p : ℕ}
+    (ho : o % 2 = 1) (hp : 0 < p) (hpt : t ≤ p) (hpo : p ∣ o) (hlt : p < o) :
+    ¬ (o - p ∈ A ∧ o + p ∈ A)
+
+-- weight systems: w ≥ 0 and ∑_{p ∈ lines T o} w o p ≤ 1 for every o ∈ odds N
+def IsWeight (T N : ℕ) (w : ℕ → ℕ → ℝ) : Prop :=
+  (∀ o p, 0 ≤ w o p) ∧ ∀ o ∈ odds N, ∑ p ∈ lines T o, w o p ≤ 1
+noncomputable def cov (T N : ℕ) (w : ℕ → ℕ → ℝ) (e : ℕ) : ℝ :=
+  ∑ p ∈ lines T e, (w (e - p) p + if e + p ≤ N then w (e + p) p else 0)
+
+theorem card_le_of_weight {t T N : ℕ} (htT : t ≤ T) (hT : 3 ≤ T) {w : ℕ → ℕ → ℝ}
+    (hw : IsWeight T N w) {A : Finset ℕ} (hA : A ⊆ Icc 1 N) (hgood : Good t A) :
+    A.card ≤ (N + 1) / 2 + (A.filter (fun e => e % 2 = 0 ∧ cov T N w e < 1)).card
+
+theorem maxAdmissible_le_of_weight {t T N : ℕ} (htT : t ≤ T) (hT : 3 ≤ T)
+    {w : ℕ → ℕ → ℝ} (hw : IsWeight T N w) :
+    maxAdmissible t N ≤ (N + 1) / 2 + (badSet T N w).card
+
+-- B1 T N = {e ∈ [1, N] : e even, 2 · rad_{≥T}(e)² < 3e}
+-- B2 T N = {p · (N / p) : p prime, T ≤ p, 4p ≤ N, N / p even}
+theorem badSet_subset {T N : ℕ} (hT : 3 ≤ T) : badSet T N (logWeight T) ⊆ B1 T N ∪ B2 T N
+
+theorem maxAdmissible_le_B1_B2 {t T N : ℕ} (htT : t ≤ T) (hT : 3 ≤ T) :
+    maxAdmissible t N ≤ (N + 1) / 2 + (B1 T N).card + (B2 T N).card
+```
+
+`badSet T N w` is `{e ∈ [1, N] : e even, cov T N w e < 1}` and `logWeight T o p = log p / log rad_{≥T}(o)`
+(the weights of Theorem A of the accompanying note; take `T = max t 3`). The analytic estimates of
+`|B₁|` and `|B₂|` (Rankin's trick, prime counting) are not formalized.
+
 ## Proof outline
 
 The full write-up is in [`docs/PROOF.md`](docs/PROOF.md); the Lean files follow it step by step.
@@ -100,6 +141,10 @@ Lower bound and asymptotic (`docs/PROOF.md`, Part II):
 | `E635/SecondMoment.lean` | `w`, `mu`, first and second moments, variance bound |
 | `E635/Main.lean` | `card_mul_mu_le` (step 6) and `erdos_635` |
 | `E635/LowerBound.lean` | `erdos_635_lower`, `maxAdmissible`, `erdos_635_isEquivalent`, `erdos_635_t_one` |
+| `E635/Lines.lean` | `lines`, the "one per line" lemma and neighbour facts |
+| `E635/DoubleCount.lean` | weight systems, `cov`, `card_le_of_weight`, `maxAdmissible_le_of_weight` |
+| `E635/Weights.lean` | `radT`, `logWeight`, `isWeight_logWeight` |
+| `E635/FiniteBound.lean` | `B1`, `B2`, `badSet_subset`, `maxAdmissible_le_B1_B2` |
 | `E635/Axioms.lean` | `#print axioms` for the main theorems |
 | `docs/PROOF.md` | the mathematical proof |
 
@@ -126,13 +171,18 @@ the modules one at a time (`lake build E635.<Module>`, then `lake build`) worked
 `lake build` compiles `E635/Axioms.lean`, which prints:
 
 ```
-info: E635/Axioms.lean:4:0: 'erdos_635' depends on axioms: [propext, Classical.choice, Quot.sound]
-info: E635/Axioms.lean:5:0: 'erdos_635_lower' depends on axioms: [propext, Classical.choice, Quot.sound]
-info: E635/Axioms.lean:6:0: 'erdos_635_isEquivalent' depends on axioms: [propext, Classical.choice, Quot.sound]
-info: E635/Axioms.lean:7:0: 'erdos_635_t_one' depends on axioms: [propext, Classical.choice, Quot.sound]
-info: E635/Axioms.lean:8:0: 'E635.card_le_maxAdmissible' depends on axioms: [propext, Classical.choice, Quot.sound]
-info: E635/Axioms.lean:9:0: 'E635.exists_card_eq_maxAdmissible' depends on axioms: [propext, Classical.choice, Quot.sound]
-info: E635/Axioms.lean:10:0: 'E635.maxAdmissible_eq_iff' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: E635/Axioms.lean:5:0: 'erdos_635' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: E635/Axioms.lean:6:0: 'erdos_635_lower' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: E635/Axioms.lean:7:0: 'erdos_635_isEquivalent' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: E635/Axioms.lean:8:0: 'erdos_635_t_one' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: E635/Axioms.lean:9:0: 'E635.card_le_maxAdmissible' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: E635/Axioms.lean:10:0: 'E635.exists_card_eq_maxAdmissible' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: E635/Axioms.lean:11:0: 'E635.maxAdmissible_eq_iff' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: E635/Axioms.lean:12:0: 'E635.one_per_line' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: E635/Axioms.lean:13:0: 'E635.card_le_of_weight' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: E635/Axioms.lean:14:0: 'E635.maxAdmissible_le_of_weight' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: E635/Axioms.lean:15:0: 'E635.badSet_subset' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: E635/Axioms.lean:16:0: 'E635.maxAdmissible_le_B1_B2' depends on axioms: [propext, Classical.choice, Quot.sound]
 ```
 
 Only the three standard axioms of Lean/Mathlib are used. The sources contain no `sorry`, `admit`,

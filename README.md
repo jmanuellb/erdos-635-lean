@@ -1,7 +1,8 @@
-# Erdős Problem 635 in Lean 4 (upper bound)
+# Erdős Problem 635 in Lean 4
 
 A complete, `sorry`-free Lean 4 / Mathlib formalization of the upper bound in
-[Erdős Problem 635](https://www.erdosproblems.com/635).
+[Erdős Problem 635](https://www.erdosproblems.com/635), together with the matching lower bound,
+the resulting asymptotic `M(t, N) ~ N/2` for the extremal size, and the exact value for `t = 1`.
 
 ## The problem
 
@@ -9,11 +10,15 @@ Let `t ≥ 1` and let `A ⊆ {1, …, N}` be a set such that whenever `a < b` ar
 `b − a ≥ t`, the difference `b − a` does not divide `b`. Is it true that
 `|A| ≤ (1/2 + o_t(1)) N`?
 
-This repository proves that the answer is **yes**. It does **not** address the second part of the
-problem as listed on erdosproblems.com ("how large can `|A|` be?", i.e. finer information on the
-extremal size beyond the `(1/2 + o(1)) N` bound).
+This repository proves that the answer is **yes**, and that it is sharp: the odd numbers give an
+admissible set of size `⌈N/2⌉` for every `t` and `N`, so the maximum `M(t, N)` satisfies
+`M(t, N) ~ N/2` for every fixed `t ≥ 1`; for `t = 1`, `M(1, N) = ⌈N/2⌉` exactly. It does **not**
+determine `M(t, N)` exactly for `t ≥ 2` (where it can exceed `⌈N/2⌉`, e.g. `M(2, 14) = 9`) or the
+size of the error term `M(t, N) − N/2`.
 
-## Lean statement
+## Lean statements
+
+### Upper bound
 
 File `E635/Main.lean`, theorem `erdos_635` (root namespace):
 
@@ -28,6 +33,37 @@ theorem erdos_635 (t : ℕ) (ht : 1 ≤ t) :
 allowed to depend on `t` and `ε`. Since `a < b`, the natural-number subtraction `b - a` is the true
 difference. The hypothesis `ht` is not used by the proof (the statement also holds for `t = 0`);
 it is kept to match the problem.
+
+### Lower bound, extremal function, asymptotic, `t = 1`
+
+File `E635/LowerBound.lean` (root namespace unless prefixed by `E635.`):
+
+```lean
+theorem erdos_635_lower (t : ℕ) (_ht : 1 ≤ t) (N : ℕ) :
+    ∃ A : Finset ℕ, A ⊆ Finset.Icc 1 N ∧
+      (∀ a ∈ A, ∀ b ∈ A, a < b → t ≤ b - a → ¬ (b - a ∣ b)) ∧
+      A.card = (N + 1) / 2 ∧ (N : ℝ) / 2 ≤ A.card
+
+noncomputable def E635.maxAdmissible (t N : ℕ) : ℕ :=
+  ((Icc 1 N).powerset.filter (fun A => Good t A)).sup card
+
+theorem E635.maxAdmissible_eq_iff {t N m : ℕ} :
+    maxAdmissible t N = m ↔
+      (∃ A : Finset ℕ, A ⊆ Icc 1 N ∧
+        (∀ a ∈ A, ∀ b ∈ A, a < b → t ≤ b - a → ¬ (b - a ∣ b)) ∧ A.card = m) ∧
+      (∀ A : Finset ℕ, A ⊆ Icc 1 N →
+        (∀ a ∈ A, ∀ b ∈ A, a < b → t ≤ b - a → ¬ (b - a ∣ b)) → A.card ≤ m)
+
+theorem erdos_635_isEquivalent (t : ℕ) (ht : 1 ≤ t) :
+    (fun N : ℕ => (E635.maxAdmissible t N : ℝ)) ~[Filter.atTop] (fun N : ℕ => (N : ℝ) / 2)
+
+theorem erdos_635_t_one (N : ℕ) : E635.maxAdmissible 1 N = (N + 1) / 2
+```
+
+`(N + 1) / 2` is natural-number division, i.e. `⌈N/2⌉`. `E635.Good t A` is the hypothesis of the
+problem, spelled out verbatim in `maxAdmissible_eq_iff` (the defining property of the maximum, split
+into `card_le_maxAdmissible` and `exists_card_eq_maxAdmissible`). `~[Filter.atTop]` is Mathlib's
+`Asymptotics.IsEquivalent`: `M(t, N) − N/2 = o(N/2)`.
 
 ## Proof outline
 
@@ -47,6 +83,14 @@ The full write-up is in [`docs/PROOF.md`](docs/PROOF.md); the Lean files follow 
 
 All error terms are constants `O(|P|)`; no asymptotics of prime sums beyond divergence are needed.
 
+Lower bound and asymptotic (`docs/PROOF.md`, Part II):
+
+8. If `a < b` are odd, `b − a` is even and `b` is odd, so `b − a ∤ b`: the odd numbers in `[1, N]`
+   are admissible for every `t`, and there are `⌈N/2⌉ ≥ N/2` of them.
+9. Hence `N/2 ≤ M(t, N) ≤ (1/2 + ε) N` eventually, i.e. `M(t, N) ~ N/2`.
+10. For `t = 1`, no two consecutive integers lie in `A` (`1 ∣ k + 1`), so `a ↦ (a − 1)/2` is
+    injective from `A` into `[0, ⌈N/2⌉)`, giving `M(1, N) = ⌈N/2⌉`.
+
 ## Files
 
 | File | Content |
@@ -55,7 +99,8 @@ All error terms are constants `O(|P|)`; no asymptotics of prime sums beyond dive
 | `E635/PrimeSum.lean` | step 1 (`exists_primes`) |
 | `E635/SecondMoment.lean` | `w`, `mu`, first and second moments, variance bound |
 | `E635/Main.lean` | `card_mul_mu_le` (step 6) and `erdos_635` |
-| `E635/Axioms.lean` | `#print axioms erdos_635` |
+| `E635/LowerBound.lean` | `erdos_635_lower`, `maxAdmissible`, `erdos_635_isEquivalent`, `erdos_635_t_one` |
+| `E635/Axioms.lean` | `#print axioms` for the main theorems |
 | `docs/PROOF.md` | the mathematical proof |
 
 ## Versions
@@ -81,7 +126,13 @@ the modules one at a time (`lake build E635.<Module>`, then `lake build`) worked
 `lake build` compiles `E635/Axioms.lean`, which prints:
 
 ```
-info: E635/Axioms.lean:3:0: 'erdos_635' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: E635/Axioms.lean:4:0: 'erdos_635' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: E635/Axioms.lean:5:0: 'erdos_635_lower' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: E635/Axioms.lean:6:0: 'erdos_635_isEquivalent' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: E635/Axioms.lean:7:0: 'erdos_635_t_one' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: E635/Axioms.lean:8:0: 'E635.card_le_maxAdmissible' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: E635/Axioms.lean:9:0: 'E635.exists_card_eq_maxAdmissible' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: E635/Axioms.lean:10:0: 'E635.maxAdmissible_eq_iff' depends on axioms: [propext, Classical.choice, Quot.sound]
 ```
 
 Only the three standard axioms of Lean/Mathlib are used. The sources contain no `sorry`, `admit`,
@@ -92,7 +143,8 @@ Only the three standard axioms of Lean/Mathlib are used. The sources contain no 
 * **Mathematics.** This repository does not claim the mathematical solution. On erdosproblems.com
   the resolution of the upper bound is attributed to GPT-5.2 Pro / Liam Price (January 2026).
   The proof in `docs/PROOF.md` was written from the public outline of that argument before
-  formalizing; the specific choices (fixed finite prime set, no Cauchy–Schwarz) are ours.
+  formalizing; the specific choices (fixed finite prime set, no Cauchy–Schwarz) are ours. The
+  lower bound (odd numbers) and the `t = 1` argument are elementary observations.
 * **Earlier Lean proof.** A Lean proof generated by Aristotle was published earlier (January 2026)
   as a link in the erdosproblems.com forum thread for this problem. It was **not** consulted:
   this formalization was written independently from `docs/PROOF.md`.

@@ -101,3 +101,31 @@ Dividing by `μ > 0`: `|A| ≤ (1/2 + ε) N`. ∎
 * Only primes are used so that `p | n ∧ q | n ⇔ pq | n` for `p ≠ q`; Step 1 holds for any `p ≥ max(t,1)`.
 * `N0` is explicit in terms of `P`, but `P` comes from the divergence of `Σ 1/p`, non-effectively
   as formalized.
+
+# Part II. Lower bound, asymptotic, and the case `t = 1` (file `E635/LowerBound.lean`)
+
+## Step 7. Lower bound: the odd numbers
+
+Let `O = {1, 3, 5, …} ∩ [1, N] = {2k + 1 : 0 ≤ k < ⌈N/2⌉}`; `|O| = ⌈N/2⌉ = ⌊(N + 1)/2⌋ ≥ N/2`.
+If `a = 2i + 1 < b = 2j + 1` are in `O`, then `b − a = 2(j − i)` is even while `b` is odd, so
+`b − a ∤ b`. Hence `O` satisfies (H) for **every** threshold `t` (in particular every `t ≥ 1`).
+
+## Step 8. The extremal function and the asymptotic
+
+Let `M(t, N)` be the largest `|A|` over `A ⊆ [1, N]` satisfying (H) (in Lean: the `sup` of `card`
+over the admissible members of the finite powerset of `[1, N]`; the empty set is admissible, so the
+sup is attained). Step 7 gives `N/2 ≤ ⌈N/2⌉ ≤ M(t, N)` for all `N`, and Steps 0–6 applied to an
+extremal `A` give `M(t, N) ≤ (1/2 + ε) N` for `N ≥ N0(t, ε)`. Hence, for `c > 0`, taking `ε = c/2`,
+`0 ≤ M(t, N) − N/2 ≤ (c/2) N = c · (N/2)` eventually, i.e. `M(t, N) − N/2 = o(N/2)`, which is the
+definition of `M(t, N) ~ N/2` (`Asymptotics.IsEquivalent`).
+
+## Step 9. Exact value for `t = 1`
+
+For `t = 1` the condition `b − a ≥ 1` is automatic, and two consecutive integers `k, k + 1` cannot
+both lie in `A` because `(k + 1) − k = 1 | k + 1`. Map `a ∈ A ⊆ [1, N]` to `(a − 1) div 2`, which
+lies in `[0, ⌈N/2⌉)`. Two elements `a < b` with the same image satisfy `{a, b} = {2m + 1, 2m + 2}`,
+so `b = a + 1`, which is excluded. The map is therefore injective and `|A| ≤ ⌈N/2⌉`. With Step 7,
+`M(1, N) = ⌈N/2⌉` exactly.
+
+For `t ≥ 2` the maximum can exceed `⌈N/2⌉` (brute force: `M(2, 14) = 9`, `M(3, 7) = 6`); only the
+asymptotic `M(t, N) ~ N/2` is proved for general `t`.

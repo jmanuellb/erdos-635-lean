@@ -1,6 +1,6 @@
 # An upper bound $N/2+O\bigl(Ne^{-c\sqrt{\log N}}\bigr)$ for Erdős Problem #635
 
-`<AUTHOR>`
+Manuel Lopez
 
 **Abstract.** For $t\ge 1$ let $M(t,N)$ be the largest size of a set $A\subseteq\{1,\dots,N\}$ such that $b-a\nmid b$ whenever $a<b$ lie in $A$ and $b-a\ge t$. We prove, for every $t\ge1$ and $N\ge1$, an explicit inequality which implies $M(t,N)\le N/2+\pi(N/4)+O_{t,\varepsilon}(N^{1/2+\varepsilon})$, and hence $M(t,N)\le N/2+(c_0+o(1))N/\log N$ with $c_0=1-\log 2-\tfrac16\approx0.1402$ (Theorem A). A modification of the weights gives $M(t,N)\le N/2+3N\exp(-0.15\sqrt{\log N})$ for all $N\ge\exp\bigl(\max\{400,\tfrac{400}{9}(\log\max(t,3))^2\}\bigr)$ (Theorem B). The best lower bound known to us is $\lceil N/2\rceil+\Theta_t(\log N)$ for $t\ge2$, so the problem remains open. We also record exact values of $M(t,N)$ for $N\le1000$ and a conjecture they suggest.
 

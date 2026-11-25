@@ -250,7 +250,7 @@ Only the three standard axioms of Lean/Mathlib are used. The sources contain no 
 * **Note.** The lower-bound construction with `{2^k : k odd}` is Erdős's (for `t = 2`). Its
   validity for all `t ≥ 2` was remarked by the forum user StijnC. Full references are in the
   note.
-* **Formalization and note:** `<AUTHOR>`.
+* **Formalization and note:** Manuel Lopez.
 
 ## AI assistance
 

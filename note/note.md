@@ -1,0 +1,219 @@
+# An upper bound $N/2+O\bigl(Ne^{-c\sqrt{\log N}}\bigr)$ for Erdős Problem #635
+
+`<AUTHOR>`
+
+**Abstract.** For $t\ge 1$ let $M(t,N)$ be the largest size of a set $A\subseteq\{1,\dots,N\}$ such that $b-a\nmid b$ whenever $a<b$ lie in $A$ and $b-a\ge t$. We prove, for every $t\ge1$ and $N\ge1$, an explicit inequality which implies $M(t,N)\le N/2+\pi(N/4)+O_{t,\varepsilon}(N^{1/2+\varepsilon})$, and hence $M(t,N)\le N/2+(c_0+o(1))N/\log N$ with $c_0=1-\log 2-\tfrac16\approx0.1402$ (Theorem A). A modification of the weights gives $M(t,N)\le N/2+3N\exp(-0.15\sqrt{\log N})$ for all $N\ge\exp\bigl(\max\{400,\tfrac{400}{9}(\log\max(t,3))^2\}\bigr)$ (Theorem B). The best lower bound known to us is $\lceil N/2\rceil+\Theta_t(\log N)$ for $t\ge2$, so the problem remains open. We also record exact values of $M(t,N)$ for $N\le1000$ and a conjecture they suggest.
+
+---
+
+## 1. The problem and what was known
+
+Throughout, $t\ge1$ and $N\ge1$ are integers, $[N]=\{1,\dots,N\}$, and $p,q$ always denote primes. Call $A\subseteq[N]$ *$t$-admissible* if for all $a,b\in A$ with $a<b$ and $b-a\ge t$ we have $(b-a)\nmid b$, and let $M(t,N)$ be the largest size of a $t$-admissible subset of $[N]$. Erdős Problem #635 [EP635] asks how large $M(t,N)$ can be, and whether $M(t,N)\le(\tfrac12+o_t(1))N$. According to [EP635] the question was asked by Erdős in a letter to Ruzsa around 1980 (see also [Gu83, Ru99]).
+
+The following was known before this note.
+
+- The odd numbers in $[N]$ form a $t$-admissible set for every $t$, so $M(t,N)\ge\lceil N/2\rceil$; Erdős observed that $M(1,N)=\lfloor (N+1)/2\rfloor=\lceil N/2\rceil$ [EP635].
+- For $t=2$, Erdős observed that the odd numbers together with $\{2^k:k\text{ odd}\}$ form an admissible set, so $M(2,N)\ge N/2+c\log N$ [EP635]. S. Cambie remarked in the forum thread [Forum] (30 January 2026) that a construction for $t=2$ is automatically valid for every larger $t$; hence $M(t,N)\ge\lceil N/2\rceil+\lceil\lfloor\log_2N\rfloor/2\rceil$ for all $t\ge2$.
+- The second question has been answered in the affirmative: the problem page [EP635] records that it was resolved by ChatGPT-5.2 (prompted by Leeham); the proof was posted in [Forum] by L. Price on 30 January 2026, with a Lean formalization. T. Tao observed [Forum] that the statement follows quickly from an inequality of Elliott [El79, Lemma 4.7], and wrote that "the Elliott-type arguments would give an $o_t(1)$ term that decays slowly - something like $O(1/\log\log N)$ - but ... probably an accuracy more like $O(\log N/N)$ is actually sought".
+- Zheng, Zhang, Avigad, Tetali and Welleck [ZZATW, Appendix C.4, Theorem C.4.1] give a written proof that $\lceil n/2\rceil\le M(t,n)\le n/2+3n/\sqrt{\log\log n}$ for $n\ge n_0(t)$, and note (Remark C.4.2) that the answer recorded on the problem page has priority.
+
+To our knowledge, then, the best upper bound written out with proof had error term of order $N/\sqrt{\log\log N}$, and the best one indicated was of order $N/\log\log N$; we found no upper bound with error $o(N/\log\log N)$ in these sources. We did not have access to [Gu83, Ru99] or to the text of [El79], and cannot exclude that a stronger bound appears in the older literature.
+
+The first question remains open. For $t\ge2$ the lower bound is $\lceil N/2\rceil+\Theta_t(\log N)$ (Section 5), while the upper bounds below have error terms $N/\log N$ and $Ne^{-c\sqrt{\log N}}$; the gap is still very large.
+
+## 2. The conflict graph and the "one per line" lemma
+
+Let $G=G(t,N)$ be the graph on $[N]$ in which $a<b$ are adjacent if $d=b-a\ge t$ and $d\mid b$. Then $M(t,N)$ is the independence number $\alpha(G)$. For $n\ge1$ write $n=2^vm$ with $m$ odd and call $m$ the *odd part* of $n$.
+
+**Lemma 2.1.**
+(a) If $a<b$ and $d=b-a$, then $d\mid b$ if and only if $d\mid a$. Hence $a<b$ are adjacent if and only if $\{a,b\}=\{(k-1)d,kd\}$ for some $d\ge t$ and $k\ge2$.
+(b) No two odd numbers are adjacent.
+(c) An even $e$ and an odd $o$ are adjacent if and only if $d=|e-o|$ satisfies $d\ge t$ and $d$ divides the odd part of $e$.
+
+*Proof.* (a) holds because $a=b-d$. (b): if $a<b$ are odd then $d$ is even and does not divide $b$. (c): $d$ is odd, and by (a) adjacency means $d\ge t$ and $d\mid e$, i.e. $d$ divides the odd part of $e$. $\square$
+
+**Lemma 2.2 (One per line).** Let $d\ge t$ be odd and let $o$ be an odd multiple of $d$. If $o-d$ and $o+d$ both lie in $[N]$, they are adjacent in $G$. Consequently a $t$-admissible set contains at most one of $o-d$, $o+d$.
+
+*Proof.* Write $o=qd$ with $q$ odd. Then $o+d=(q+1)d$ and $(o+d)-(o-d)=2d\ge t$, and $2d\mid(q+1)d$ because $q+1$ is even. $\square$
+
+Let $T=\max(t,3)$. All primes used below are $\ge T$, hence odd. If $e$ is even and $p\ge T$ divides $e$, then $e\ge2p$, so $e-p\ge p\ge1$; both $e\pm p$ are odd multiples of $p$, and each of them that lies in $[N]$ is adjacent to $e$ by Lemma 2.1(a), since $|e-(e\pm p)|=p\ge t$ and $p$ divides the larger of the two numbers.
+
+**Definition.** A *weight system* is a function $w$ defined on pairs $(o,p)$, with $o\le N$ odd and $p\ge T$ a prime dividing $o$, such that $w(o,p)\ge0$ and $\sum_pw(o,p)\le1$ for each $o$. For even $e\le N$ put
+
+$$
+\mathrm{cov}_w(e)=\sum_{p\mid e,\ p\ge T}\Bigl(w(e-p,p)+\mathbf 1_{e+p\le N}\,w(e+p,p)\Bigr),\qquad
+\mathcal B_w=\{e\le N\text{ even}:\mathrm{cov}_w(e)<1\}.
+$$
+
+**Lemma 2.3.** For every weight system $w$ and every $t$-admissible $A\subseteq[N]$, $|A|\le\lceil N/2\rceil+|\mathcal B_w|$. Hence $M(t,N)\le\lceil N/2\rceil+|\mathcal B_w|$.
+
+*Proof.* Let $S$ be the set of even elements of $A$ and $A_1$ the set of odd ones. Let $I$ be the set of triples $(e,o,p)$ with $e\in S$, $p\ge T$ a prime dividing $e$, and $o\in\{e-p,e+p\}\cap[N]$. For $(e,o,p)\in I$, $o$ is odd, $p\mid o$, and $o$ is adjacent to $e\in A$, so $o\notin A$. For fixed $(o,p)$ the possible $e$ are $o-p$ and $o+p$, and by Lemma 2.2 (with $d=p$) at most one of them is in $A$; so each pair $(o,p)$ occurs in at most one triple of $I$. Therefore
+
+$$
+\sum_{e\in S}\mathrm{cov}_w(e)=\sum_{(e,o,p)\in I}w(o,p)\le\sum_{o\le N\text{ odd},\ o\notin A}\ \sum_pw(o,p)\le\Bigl\lceil\frac N2\Bigr\rceil-|A_1|.
+$$
+
+(For $e\in S$ every term in the definition of $\mathrm{cov}_w(e)$ corresponds to a triple in $I$, so the first equality holds.) Since $\mathrm{cov}_w\ge0$, every even $e$ satisfies $1\le\mathrm{cov}_w(e)+\mathbf 1_{e\in\mathcal B_w}$. Summing over $e\in S$ gives $|S|\le\lceil N/2\rceil-|A_1|+|\mathcal B_w|$, i.e. $|A|=|A_1|+|S|\le\lceil N/2\rceil+|\mathcal B_w|$. $\square$
+
+In other words, $w$ is a fractional cover of the even vertices by the odd vertices, and Lemma 2.2 is what makes the cover legitimate: along each "line" $(o,p)$ at most one even vertex can draw on $o$.
+
+## 3. Theorem A: an error term $O(N/\log N)$
+
+For a real number $y$ and $n\ge1$ let $\mathrm{rad}_{\ge y}(n)=\prod_{p\mid n,\ p\ge y}p$ and $\mathrm{rad}_{>y}(n)=\prod_{p\mid n,\ p>y}p$ (empty products are $1$), and let $\pi(x)$ be the number of primes $\le x$.
+
+**Theorem A.** Let $t\ge1$, $N\ge1$ and $T=\max(t,3)$. Put
+
+$$
+\mathcal B_1=\{e\le N\text{ even}:\ \mathrm{rad}_{\ge T}(e)^2<\tfrac32e\},\qquad
+\mathcal B_2=\{p\lfloor N/p\rfloor:\ T\le p\le N/4,\ \lfloor N/p\rfloor\text{ even}\}.
+$$
+
+Then
+
+$$
+M(t,N)\le\Bigl\lceil\frac N2\Bigr\rceil+|\mathcal B_1|+|\mathcal B_2|. \tag{1}
+$$
+
+Moreover $|\mathcal B_2|\le\pi(N/4)$, and for every $0<\varepsilon\le\tfrac12$,
+
+$$
+|\mathcal B_1|\le C(t,\varepsilon)N^{1/2+\varepsilon},\qquad
+C(t,\varepsilon)=\Bigl(\frac32\Bigr)^{1/2}\prod_{p<T}\bigl(1-p^{-\varepsilon}\bigr)^{-1}\prod_{p\ge T}\Bigl(1+\frac{p^{-1-\varepsilon}}{1-p^{-\varepsilon}}\Bigr)<\infty.
+$$
+
+Consequently $M(t,N)\le N/2+\pi(N/4)+O_{t,\varepsilon}(N^{1/2+\varepsilon})$, and $M(t,N)\le N/2+(c_0+o(1))N/\log N$ as $N\to\infty$ with $t$ fixed, where $c_0=1-\log2-\frac16=0.1401\ldots$.
+
+*Proof.* For odd $o\le N$ and a prime $p\ge T$ dividing $o$ let $w(o,p)=\log p/\log\mathrm{rad}_{\ge T}(o)$. Here $\mathrm{rad}_{\ge T}(o)\ge p\ge3$, and $\sum_pw(o,p)=1$, so $w$ is a weight system. By Lemma 2.3 it suffices to show $\mathcal B_w\subseteq\mathcal B_1\cup\mathcal B_2$. Let $e\le N$ be even with $e\notin\mathcal B_1\cup\mathcal B_2$, and let $R=\mathrm{rad}_{\ge T}(e)$. Every prime $p\ge T$ dividing $e$ satisfies $p\le e/2$.
+
+*Case 1: $e+p\le N$ for every prime $p\ge T$ dividing $e$.* Then for each such $p$ both $e\pm p$ lie in $[N]$, and $\mathrm{rad}_{\ge T}(e\pm p)\le e\pm p\le\frac32e$, so $w(e\pm p,p)\ge\log p/\log(\frac32e)$. Hence
+
+$$
+\mathrm{cov}_w(e)\ge\sum_{p\mid e,\ p\ge T}\frac{2\log p}{\log(\frac32e)}=\frac{\log R^2}{\log(\frac32e)}\ge1,
+$$
+
+because $R^2\ge\frac32e$ (as $e\notin\mathcal B_1$).
+
+*Case 2: some prime $p\ge T$ dividing $e$ has $e+p>N$.* Write $e=kp$; $k$ is even because $e$ is even and $p$ is odd. From $kp\le N<(k+1)p$ we get $k=\lfloor N/p\rfloor$. If $k\ge4$ then $p\le N/4$ and $e\in\mathcal B_2$, which is excluded. So $k=2$, $e=2p$, and the term $w(e-p,p)=w(p,p)=\log p/\log p=1$ gives $\mathrm{cov}_w(e)\ge1$.
+
+Thus $e\notin\mathcal B_w$, proving (1).
+
+The map $p\mapsto p\lfloor N/p\rfloor$ from primes in $[T,N/4]$ onto $\mathcal B_2$ shows $|\mathcal B_2|\le\pi(N/4)$.
+
+For $\mathcal B_1$ we use Rankin's trick. Let $f(n)=n^{-\varepsilon}\mathrm{rad}_{\ge T}(n)^{-1}$. If $e\in\mathcal B_1$ then $\frac{3e}{2R^2}>1$ and $N/e\ge1$, so
+
+$$
+1<\Bigl(\frac{3e}{2R^2}\Bigr)^{1/2}\Bigl(\frac Ne\Bigr)^{1/2+\varepsilon}=\Bigl(\frac32\Bigr)^{1/2}N^{1/2+\varepsilon}f(e).
+$$
+
+Summing over $e\in\mathcal B_1$ and extending the sum to all $n\ge1$, $|\mathcal B_1|\le(\frac32)^{1/2}N^{1/2+\varepsilon}\sum_{n\ge1}f(n)$. The function $f$ is non-negative and multiplicative, with $\sum_{k\ge0}f(p^k)=(1-p^{-\varepsilon})^{-1}$ for $p<T$ and $=1+p^{-1}\sum_{k\ge1}p^{-k\varepsilon}=1+p^{-1-\varepsilon}/(1-p^{-\varepsilon})$ for $p\ge T$. So $\sum_nf(n)$ equals the Euler product in $C(t,\varepsilon)$, which converges since $1-p^{-\varepsilon}\ge1-2^{-\varepsilon}>0$ and $\sum_pp^{-1-\varepsilon}<\infty$.
+
+Finally, $|\mathcal B_2|\le\sum_{k\ge4\text{ even}}\bigl(\pi(N/k)-\pi(N/(k+1))\bigr)$. For fixed even $K\ge4$, the prime number theorem gives $\sum_{4\le k\le K,\ k\text{ even}}(\pi(N/k)-\pi(N/(k+1)))=(1+o(1))\frac N{\log N}\sum_{4\le k\le K,\ k\text{ even}}\bigl(\frac1k-\frac1{k+1}\bigr)$, and the terms with $k>K$ contribute at most $\pi(N/K)\le(1+o(1))N/(K\log N)$. Since $\sum_{k\ge2\text{ even}}(\frac1k-\frac1{k+1})=1-\log2$, the full sum over even $k\ge4$ is $1-\log2-\frac16=c_0$; letting $K\to\infty$ gives $|\mathcal B_2|\le(c_0+o(1))N/\log N$. Together with $\lceil N/2\rceil\le N/2+\frac12$ and the bound for $|\mathcal B_1|$ this gives the last assertion. $\square$
+
+**Remark 3.1.** Inequality (1) is explicit and can be evaluated. For instance, for $t=2$ and $N=2\cdot10^5$ it gives $M(2,N)\le\lceil N/2\rceil+5931$, i.e. an excess of at most about $3\%$ of $N$. The term $\mathcal B_2$ is a genuine obstruction for these weights: for $t\le3$ and a prime $p\in(N/5,N/4]$, the even number $e=4p$ has $3p$ as its only odd neighbour of the form $e\pm q$ with $q\ge T$ prime, $q\mid e$, while $w(3p,p)=\log p/\log(3p)<1$.
+
+## 4. Theorem B: an error term $O(Ne^{-c\sqrt{\log N}})$
+
+The only bottleneck in Case 2 above is the elements $kp$ with $k$ small. Theorem B gives the odd numbers $o=rp$ with small cofactor $r$ all their weight on $p$.
+
+**Proposition 4.1.** Let $t\ge1$, $T=\max(t,3)$, let $D\ge T$ be an integer and $N\ge D(D+2)$. Then
+
+$$
+M(t,N)\le\Bigl\lceil\frac N2\Bigr\rceil+\pi\Bigl(\frac N{D+2}\Bigr)+|\mathcal B_1^{(D)}|,\qquad
+\mathcal B_1^{(D)}=\{e\le N\text{ even}:\ \mathrm{rad}_{>D}(e)^2<\tfrac32e\}.
+$$
+
+*Proof.* Call an odd $o\le N$ *special* if $o=rp$ with $p>D$ prime and $1\le r\le D$. Then $p$ is uniquely determined (any prime $q>D$ dividing $rp$ cannot divide $r\le D$, so $q=p$); in particular $p$ is the only prime factor of $o$ exceeding $D$, and $p\ge T$. Define $w(o,p)=1$ and $w(o,q)=0$ for the other primes $q\ge T$ dividing a special $o$, and $w(o,q)=\log q/\log\mathrm{rad}_{\ge T}(o)$ for non-special $o$. This is a weight system. Put $\mathcal B_2^{(D)}=\{p\lfloor N/p\rfloor:\ p\ge T,\ \lfloor N/p\rfloor\text{ even},\ \lfloor N/p\rfloor\ge D+2\}$; as before $|\mathcal B_2^{(D)}|\le\pi(N/(D+2))$. By Lemma 2.3 it suffices to show $\mathcal B_w\subseteq\mathcal B_1^{(D)}\cup\mathcal B_2^{(D)}$. Let $e\le N$ be even.
+
+*Case 1: some prime $p\ge T$ dividing $e$ has $e+p>N$.* As before $e=kp$ with $k=\lfloor N/p\rfloor$ even. If $k\ge D+2$ then $e\in\mathcal B_2^{(D)}$. Otherwise $2\le k\le D+1$, so $p>N/(k+1)\ge N/(D+2)\ge D$, and $o=e-p=(k-1)p$ is special with $r=k-1\le D$. Hence $w(e-p,p)=1$ and $\mathrm{cov}_w(e)\ge1$.
+
+*Case 2: $e+q\le N$ for every prime $q\ge T$ dividing $e$.* Let $q>D$ be a prime dividing $e$ (so $q\ge T$), and $o\in\{e-q,e+q\}$; then $o\in[N]$, $q\mid o$ and $o\le\frac32e$. If $o$ is non-special, $w(o,q)\ge\log q/\log o\ge\log q/\log(\frac32e)$. If $o$ is special, $q$ is its unique prime factor exceeding $D$, so $w(o,q)=1\ge\log q/\log(\frac32e)$. Discarding the (non-negative) terms with $q\le D$,
+
+$$
+\mathrm{cov}_w(e)\ge\sum_{q\mid e,\ q>D}\frac{2\log q}{\log(\frac32e)}=\frac{\log\mathrm{rad}_{>D}(e)^2}{\log(\frac32e)},
+$$
+
+which is $\ge1$ unless $e\in\mathcal B_1^{(D)}$. $\square$
+
+**Lemma 4.2.** Let $D\ge1$ be an integer and $0<u\le\frac12$. Then $|\mathcal B_1^{(D)}|\le1.5\,N^{1-u/4}\exp\bigl(3.42\,D^u/u+6.84/u\bigr)$.
+
+*Proof.* Let $a=3u/4$ and $b=1-u/4$, so that $a-b=u-1$ and $2a=3u/2$. For $e\in\mathcal B_1^{(D)}$ we have $1<\bigl(\frac{3e}{2\,\mathrm{rad}_{>D}(e)^2}\bigr)^a(N/e)^b$; summing over all $n\ge1$,
+
+$$
+|\mathcal B_1^{(D)}|\le\Bigl(\frac32\Bigr)^aN^b\sum_{n\ge1}n^{u-1}\mathrm{rad}_{>D}(n)^{-3u/2}
+=\Bigl(\frac32\Bigr)^aN^{1-u/4}\prod_{p\le D}\frac1{1-p^{u-1}}\prod_{p>D}\Bigl(1+\frac{p^{-1-u/2}}{1-p^{u-1}}\Bigr).
+$$
+
+Here $(\frac32)^a\le(\frac32)^{3/8}<1.5$. Since $u\le\frac12$, $x:=p^{u-1}\le2^{-1/2}$, so $1-x\ge1-2^{-1/2}>1/3.42$ and $-\log(1-x)\le x/(1-x)\le3.42x$. Hence the logarithm of the first product is at most $3.42\sum_{2\le n\le D}n^{u-1}\le3.42\int_1^Dx^{u-1}\,dx\le3.42\,D^u/u$, and, using $\log(1+y)\le y$, the logarithm of the second is at most $3.42\sum_{n>D}n^{-1-u/2}\le3.42\int_D^\infty x^{-1-u/2}\,dx\le6.84/u$. $\square$
+
+**Theorem B.** Let $t\ge1$, $T=\max(t,3)$ and $N_0(t)=\exp\bigl(\max\{400,\tfrac{400}9(\log T)^2\}\bigr)$. For all $N\ge N_0(t)$,
+
+$$
+M(t,N)\le\frac N2+3N\exp\bigl(-0.15\sqrt{\log N}\bigr).
+$$
+
+In particular $M(t,N)\le N/2+O_{t,K}(N/(\log N)^K)$ for every fixed $K>0$.
+
+*Proof.* Let $s=\sqrt{\log N}$, $D=\lfloor e^{0.15s}\rfloor$ and $u=10/s$. Since $N\ge N_0(t)$ we have $s\ge20$, so $u\le\frac12$; and $s\ge\frac{20}3\log T$, so $e^{0.15s}\ge T$ and hence $D\ge T$ (as $T$ is an integer). Also $D(D+2)\le3e^{0.3s}<e^{s^2}=N$. So Proposition 4.1 and Lemma 4.2 apply.
+
+Since $D\le e^{0.15s}$, $D^u\le e^{1.5}<4.482$. Lemma 4.2 gives
+
+$$
+\log|\mathcal B_1^{(D)}|\le\log1.5+s^2-\frac{10s}4+\frac{3.42\cdot4.482\,s}{10}+\frac{6.84\,s}{10}\le\log1.5+\log N-0.28\,s,
+$$
+
+because $-2.5+1.5329+0.684<-0.28$. So $|\mathcal B_1^{(D)}|\le1.5Ne^{-0.28s}\le1.5Ne^{-0.15s}$. Next, $D+2>e^{0.15s}$, so $\pi(N/(D+2))\le N/(D+2)<Ne^{-0.15s}$. Finally $\lceil N/2\rceil\le N/2+\frac12$ and $\frac12\le\frac12Ne^{-0.15s}$. Adding up, Proposition 4.1 gives $M(t,N)\le N/2+3Ne^{-0.15s}$. The last statement follows because $e^{-0.15\sqrt{\log N}}=O_K((\log N)^{-K})$. $\square$
+
+**Remark 4.3.** (1) The constant $0.15$ is not optimised. The threshold $N_0(t)\ge e^{400}$ is far beyond computation, and the gain over Theorem A is purely asymptotic: in all numerical comparisons we made (small $D$, $N\le10^6$), the explicit bound (1) was smaller than the bound of Proposition 4.1. (2) Both theorems remain very far from the lower bound $\lceil N/2\rceil+\Theta_t(\log N)$. We do not know whether weight systems of the type used here can reach an error $o(Ne^{-c\sqrt{\log N}})$; we make no claim in that direction.
+
+## 5. The lower bound
+
+Let $F_t(N)=\{e\le N:\ e\text{ even, with odd part}<t\}$ and let $G[F_t(N)]$ be the subgraph of $G(t,N)$ induced on $F_t(N)$.
+
+**Proposition 5.1.** For all $t,N\ge1$, $M(t,N)\ge\lceil N/2\rceil+\alpha(G[F_t(N)])$. For $t\ge2$,
+
+$$
+\Bigl\lceil\frac{\lfloor\log_2N\rfloor}2\Bigr\rceil\le\alpha(G[F_t(N)])\le|F_t(N)|\le\Bigl\lfloor\frac t2\Bigr\rfloor\lfloor\log_2N\rfloor,
+$$
+
+so the lower bound is $\lceil N/2\rceil+\Theta_t(\log N)$.
+
+*Proof.* Let $J$ be a maximum independent set of $G[F_t(N)]$ and $A$ the union of $J$ with the odd numbers in $[N]$. Odd numbers are pairwise non-adjacent (Lemma 2.1(b)). If $e\in F_t(N)$ has odd part $m<t$ and $o$ is odd, an edge would need an odd $d=|e-o|\ge t$ dividing $m$ (Lemma 2.1(c)), impossible since $d\le m<t$. So $A$ is independent. For $t\ge2$, $F_t(N)$ contains $2^k$ for $1\le k\le\lfloor\log_2N\rfloor$; for $i<j$, $2^j-2^i=2^i(2^{j-i}-1)$ divides $2^j$ only if $j=i+1$, so $\{2^k:k\text{ odd},\ k\le\log_2N\}$ is independent. The upper bound for $|F_t(N)|$ holds because there are $\lfloor t/2\rfloor$ odd $m<t$ and, for each, at most $\lfloor\log_2N\rfloor$ exponents $v\ge1$ with $2^vm\le N$. $\square$
+
+The construction with $\{2^k:k\text{ odd}\}$ is Erdős's (for $t=2$); its validity for all $t\ge2$ is Cambie's remark [Forum]. Replacing the powers of $2$ by a maximum independent subset of $F_t(N)$ is a small refinement; for $t=2$ and $t=3$ it gives nothing new beyond an additive constant, since $G[F_2(N)]$ is a path on $2,4,\dots,2^{\lfloor\log_2N\rfloor}$ and $G[F_3(N)]$ is the same path with the edge $\{2,4\}$ removed.
+
+## 6. Computational evidence and a conjecture
+
+We computed $M(t,N)$ exactly with the CP-SAT solver of OR-tools for every $N\le1000$ when $t\in\{2,5,6\}$, every $N\le939$ when $t=3$, and every $N\le300$ when $t=4$, solving the independent-set problem on $G(t,N)$ (with triangle inequalities added as cuts). The solver reported every instance as optimal. The table lists $M(t,N)-\lceil N/2\rceil$ at $N=2^k$ ($t=4$ was computed only for $N\le300$).
+
+| $t\backslash N$ | 2 | 4 | 8 | 16 | 32 | 64 | 128 | 256 | 512 |
+|---|---|---|---|---|---|---|---|---|---|
+| 2 | 1 | 1 | 2 | 2 | 3 | 3 | 4 | 4 | 5 |
+| 3 | 1 | 2 | 2 | 3 | 3 | 4 | 4 | 5 | 5 |
+| 4 | 1 | 2 | 3 | 4 | 4 | 5 | 6 | 6 | – |
+| 5 | 1 | 2 | 4 | 4 | 5 | 6 | 6 | 7 | 8 |
+| 6 | 1 | 2 | 4 | 5 | 6 | 8 | 8 | 10 | 11 |
+
+In every computed case, $M(t,N)=\lceil N/2\rceil+\alpha(G[F_t(N)])$; for instance $M(2,N)=\lceil N/2\rceil+\lceil\lfloor\log_2N\rfloor/2\rceil$ for all $N\le1000$. The checks we performed are listed in Section 7. These data suggest:
+
+**Conjecture 6.1 (computational evidence only).** For all $t,N\ge1$, $M(t,N)=\lceil N/2\rceil+\alpha(G[F_t(N)])$. In particular $M(t,N)=N/2+O_t(\log N)$.
+
+Let $E'_t(N)$ be the set of even $e\le N$ whose odd part is $\ge t$, so that the even numbers in $[N]$ are $F_t(N)\cup E'_t(N)$, and for $X\subseteq E'_t(N)$ let $\Gamma(X)$ be the set of odd numbers in $[N]$ adjacent to some element of $X$.
+
+**Proposition 6.2.** Suppose that $|\Gamma(X)|\ge|X|$ for every independent set $X\subseteq E'_t(N)$. Then $M(t,N)=\lceil N/2\rceil+\alpha(G[F_t(N)])$.
+
+*Proof.* The lower bound is Proposition 5.1. Let $A$ be $t$-admissible, $X=A\cap E'_t(N)$ and $Y=A\cap F_t(N)$. The odd elements of $A$ avoid $\Gamma(X)$, so $|A|\le(\lceil N/2\rceil-|\Gamma(X)|)+|X|+|Y|\le\lceil N/2\rceil+\alpha(G[F_t(N)])$. $\square$
+
+The Hall-type hypothesis is only a sufficient condition, and the independence assumption on $X$ cannot be dropped: for $t=2$ the maximum of $|X|-|\Gamma(X)|$ over all $X\subseteq E'_2(N)$ is $5$, $15$ and $25$ at $N=100$, $200$, $400$. For independent $X$ we verified the hypothesis (the maximum of $|X|-|\Gamma(X)|$ is $0$; CP-SAT, solved to optimality) for $t=2,\dots,6$ and all $N\le150$. We have no proof for general $N$. For $t=2$ and $t=3$, Conjecture 6.1 reads $M(t,N)-\lceil N/2\rceil=\lceil\lfloor\log_2N\rfloor/2\rceil$ (for $N\ge1$) and $1+\lceil(\lfloor\log_2N\rfloor-1)/2\rceil$ (for $N\ge2$), respectively.
+
+## 7. Provenance
+
+The results and proofs in this note were produced with substantial assistance from AI systems (Anthropic's Claude models) directed by the author. The exact values in Section 6 were computed with the CP-SAT solver of OR-tools. An independent AI referee pass re-derived the proofs of Theorems A and B and re-computed $M(t,N)$ for $t\le7$ and $N\le120$ with separate code (exhaustive search for $N\le22$, a separate branch-and-reduce search up to $120$), finding no discrepancy; it also checked the inclusions $\mathcal B_w\subseteq\mathcal B_1\cup\mathcal B_2$ and $\mathcal B_w\subseteq\mathcal B_1^{(D)}\cup\mathcal B_2^{(D)}$ numerically for several thousand values of $N$ up to $10^6$. In preparing this note we additionally checked that every optimal set reported by the solver is admissible and of the stated size, that every reported value equals $\lceil N/2\rceil+\alpha(G[F_t(N)])$ computed by separate code, re-computed the entries of the table with $N\le128$ by a separate exact search, and ran the Hall-type checks quoted in Section 6 with a separately written CP-SAT model. No human expert has refereed this note. A companion Lean 4 formalization (the repository containing this note) covers the first-order statements ($M(t,N)\sim N/2$ and $M(1,N)=\lceil N/2\rceil$), Lemmas 2.2 and 2.3, and inequality (1) of Theorem A. It does not cover the estimates of $|\mathcal B_1|$ and $|\mathcal B_2|$ in Theorem A, nor anything in Section 4 (Proposition 4.1, Lemma 4.2, Theorem B). Corrections are welcome.
+
+## References
+
+- [EP635] T. F. Bloom, *Erdős Problem #635*, https://www.erdosproblems.com/635 (page last edited 1 February 2026; accessed November 2026).
+- [Forum] Discussion thread for Problem #635, https://www.erdosproblems.com/forum/thread/635 (comments of 30–31 January 2026 by L. Price, S. Cambie, N. Sothanaphan and T. Tao).
+- [El79] P. D. T. A. Elliott, *Probabilistic Number Theory I: Mean-Value Theorems*, Grundlehren der Mathematischen Wissenschaften 239, Springer, New York–Berlin, 1979.
+- [Gu83] R. K. Guy, *A miscellany of Erdős problems*, Amer. Math. Monthly **90** (1983), 118–120.
+- [Ru99] I. Z. Ruzsa, *Erdős and the integers*, J. Number Theory **79** (1999), 115–163.
+- [ZZATW] Z. Zheng, S. Zhang, J. Avigad, P. Tetali and S. Welleck, *The Problem Is the Problem: Towards Scalable Mathematical Discovery*, arXiv:2608.16977 (2026), https://arxiv.org/abs/2608.16977.
